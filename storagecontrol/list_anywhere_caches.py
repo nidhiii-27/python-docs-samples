@@ -25,9 +25,8 @@ def list_anywhere_caches(bucket_name: str) -> None:
     storage_control_client = storage_control_v2.StorageControlClient()
     # The storage bucket path uses the global access pattern, in which the "_"
     # denotes this bucket exists in the global namespace.
-    bucket_path = storage_control_client.managed_folder_path(
-        "_", bucket_name, ""
-    ).split("/managedFolders/")[0]
+    project_path = storage_control_client.common_project_path("_")
+    bucket_path = f"{project_path}/buckets/{bucket_name}"
 
     request = storage_control_v2.ListAnywhereCachesRequest(
         parent=bucket_path,
