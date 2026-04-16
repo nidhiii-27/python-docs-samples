@@ -26,18 +26,29 @@ import managed_folder_get
 import managed_folder_list
 import rename_folder
 
+import create_anywhere_cache
+import disable_anywhere_cache
+import get_anywhere_cache
+import list_anywhere_caches
+import pause_anywhere_cache
+import resume_anywhere_cache
+import update_anywhere_cache
 
 # === Folders === #
 
 
 def test_folder_create_get_list_rename_delete(
-    capsys: pytest.LogCaptureFixture, hns_enabled_bucket: storage.Bucket, uuid_name: str
+    capsys: pytest.LogCaptureFixture,
+    hns_enabled_bucket: storage.Bucket,
+    uuid_name: str,
 ) -> None:
     bucket_name = hns_enabled_bucket.name
     folder_name = uuid_name
 
     # Test create folder
-    create_folder.create_folder(bucket_name=bucket_name, folder_name=folder_name)
+    create_folder.create_folder(
+        bucket_name=bucket_name, folder_name=folder_name
+    )
     out, _ = capsys.readouterr()
     assert folder_name in out
 
@@ -65,6 +76,68 @@ def test_folder_create_get_list_rename_delete(
     delete_folder.delete_folder(bucket_name=bucket_name, folder_name=new_name)
     out, _ = capsys.readouterr()
     assert new_name in out
+
+
+# === Anywhere Cache === #
+
+
+def test_anywhere_cache_operations(
+    capsys: pytest.LogCaptureFixture,
+    ubla_enabled_bucket: storage.Bucket,
+) -> None:
+    bucket_name = ubla_enabled_bucket.name
+    zone = "us-central1-a"
+
+    try:
+        # Test create anywhere cache
+        create_anywhere_cache.create_anywhere_cache(
+            bucket_name=bucket_name, zone=zone
+        )
+        out, _ = capsys.readouterr()
+        assert f"buckets/{bucket_name}/anywhereCaches/{zone}" in out
+
+        # Test get anywhere cache
+        get_anywhere_cache.get_anywhere_cache(
+            bucket_name=bucket_name, zone=zone
+        )
+        out, _ = capsys.readouterr()
+        assert f"buckets/{bucket_name}/anywhereCaches/{zone}" in out
+
+        # Test list anywhere caches
+        list_anywhere_caches.list_anywhere_caches(bucket_name=bucket_name)
+        out, _ = capsys.readouterr()
+        assert f"buckets/{bucket_name}/anywhereCaches/{zone}" in out
+
+        # Test update anywhere cache
+        update_anywhere_cache.update_anywhere_cache(
+            bucket_name=bucket_name,
+            zone=zone,
+            admission_policy="admit-on-second-miss",
+        )
+        out, _ = capsys.readouterr()
+        assert f"buckets/{bucket_name}/anywhereCaches/{zone}" in out
+
+        # Test pause anywhere cache
+        pause_anywhere_cache.pause_anywhere_cache(
+            bucket_name=bucket_name, zone=zone
+        )
+        out, _ = capsys.readouterr()
+        assert f"buckets/{bucket_name}/anywhereCaches/{zone}" in out
+
+        # Test resume anywhere cache
+        resume_anywhere_cache.resume_anywhere_cache(
+            bucket_name=bucket_name, zone=zone
+        )
+        out, _ = capsys.readouterr()
+        assert f"buckets/{bucket_name}/anywhereCaches/{zone}" in out
+
+    finally:
+        # Test disable anywhere cache
+        disable_anywhere_cache.disable_anywhere_cache(
+            bucket_name=bucket_name, zone=zone
+        )
+        out, _ = capsys.readouterr()
+        assert f"buckets/{bucket_name}/anywhereCaches/{zone}" in out
 
 
 # === Managed Folders === #
